@@ -1,27 +1,23 @@
+from dash import Dash, html, dcc 
 import pandas as pd
- 
-#read all csv files in the directory
-data1= pd.read_csv('data/daily_sales_data_0.csv')
-data2= pd.read_csv('data/daily_sales_data_1.csv')
-data3= pd.read_csv('data/daily_sales_data_2.csv')
+import plotly.express as px
 
-#merge all data into single file
-merged_data = pd.concat([data1,data2,data3], ignore_index=True)
+app = Dash()
 
-#save merged data to csv
-merged_data.to_csv('merged_data.csv', index=False)
+df = pd.read_csv('pink_morsel_data.csv')
 
-#filter pink_morsel data
-pink_morsel_data = merged_data[merged_data['product'] == 'pink morsel']
+app.layout = html.Div(children=[
+    html.H1(children='Visualization of Pink Morsel Sales'),
 
-#clean price column
-pink_morsel_data['price'] = pink_morsel_data['price'].str.replace('$', '').astype(float)
+    html.Div(children='''
+        The following graph shows the sales of pink morsel over time.
+    '''),
 
-#calculate sales
-pink_morsel_data['sales'] = pink_morsel_data['price'] * pink_morsel_data['quantity']
+    dcc.Graph(
+        id='sales-graph',
+        figure=px.line(df, x='date', y='sales')
+    )
+])
 
-#keeping 3 columns
-pink_morsel_data = pink_morsel_data[['date', 'region', 'sales']]
-
-#save pink_morsel_data to csv
-pink_morsel_data.to_csv('pink_morsel_data.csv', index=False)
+if __name__ == '__main__':
+    app.run(debug=True)
